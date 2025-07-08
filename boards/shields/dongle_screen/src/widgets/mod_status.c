@@ -13,18 +13,18 @@ static void update_mod_status(struct zmk_widget_mod_status *widget)
     char text[32] = "";
     int idx = 0;
 
-    // Temporäre Puffer für Symbole
+    // Use smaller, subtle symbols for minimalist design
     char *syms[4];
     int n = 0;
 
     if (mods & (MOD_LCTL | MOD_RCTL))
-        syms[n++] = "󰘴";
+        syms[n++] = "⌃";
     if (mods & (MOD_LSFT | MOD_RSFT))
-        syms[n++] = "󰘶"; // U+F0636
+        syms[n++] = "⇧";
     if (mods & (MOD_LALT | MOD_RALT))
-        syms[n++] = "󰘵"; // U+F0635
+        syms[n++] = "⌥";
     if (mods & (MOD_LGUI | MOD_RGUI))
-        syms[n++] = "󰘳"; // U+F0633
+        syms[n++] = "⌘";
 
     for (int i = 0; i < n; ++i)
     {
@@ -47,12 +47,15 @@ static struct k_timer mod_status_timer;
 int zmk_widget_mod_status_init(struct zmk_widget_mod_status *widget, lv_obj_t *parent)
 {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, 180, 40);
+    lv_obj_set_size(widget->obj, 120, 30);
+    lv_obj_set_style_bg_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
 
     widget->label = lv_label_create(widget->obj);
     lv_obj_align(widget->label, LV_ALIGN_CENTER, 0, 0);
-    lv_label_set_text(widget->label, "-");
-    lv_obj_set_style_text_font(widget->label, &NerdFonts_Regular_40, 0); // <-- NerdFont setzen
+    lv_label_set_text(widget->label, "");
+    lv_obj_set_style_text_font(widget->label, &lv_font_montserrat_18, 0);
+    lv_obj_set_style_text_color(widget->label, lv_color_hex(0xCCCCCC), LV_PART_MAIN);
 
     k_timer_init(&mod_status_timer, mod_status_timer_cb, NULL);
     k_timer_user_data_set(&mod_status_timer, widget);

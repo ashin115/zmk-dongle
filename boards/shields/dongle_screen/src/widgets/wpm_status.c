@@ -32,9 +32,12 @@ static struct wpm_status_state get_state(const zmk_event_t *_eh)
 
 static void set_wpm(struct zmk_widget_wpm_status *widget, struct wpm_status_state state)
 {
-
-    char wpm_text[12];
-    snprintf(wpm_text, sizeof(wpm_text), "%i", state.wpm);
+    char wpm_text[16];
+    if (state.wpm > 0) {
+        snprintf(wpm_text, sizeof(wpm_text), "%i wpm", state.wpm);
+    } else {
+        snprintf(wpm_text, sizeof(wpm_text), "---");
+    }
     lv_label_set_text(widget->wpm_label, wpm_text);
 }
 
@@ -55,19 +58,15 @@ ZMK_SUBSCRIPTION(widget_wpm_status, zmk_wpm_state_changed);
 int zmk_widget_wpm_status_init(struct zmk_widget_wpm_status *widget, lv_obj_t *parent)
 {
     widget->obj = lv_obj_create(parent);
-    lv_obj_set_size(widget->obj, 240, 77);
+    lv_obj_set_size(widget->obj, 80, 30);
+    lv_obj_set_style_bg_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
 
     widget->wpm_label = lv_label_create(widget->obj);
-    lv_obj_align(widget->wpm_label, LV_ALIGN_TOP_LEFT, 0, 0);
-
-    // Only here as a sample
-    // widget->font_test = lv_label_create(widget->obj);
-    // lv_obj_set_style_text_font(widget->font_test, &NerdFonts_Regular_20, 0);
-    // lv_obj_align(widget->font_test, LV_ALIGN_TOP_RIGHT, -80, 0);
-
-    // Only here as a sample
-    // lv_label_set_text(widget->font_test, "󰕓󰘳󰘵󰘶");
-    // TODO: Explizit als UTF-8 wert setzen?
+    lv_obj_set_style_text_font(widget->wpm_label, &lv_font_montserrat_14, 0);
+    lv_obj_set_style_text_color(widget->wpm_label, lv_color_hex(0x888888), LV_PART_MAIN);
+    lv_obj_align(widget->wpm_label, LV_ALIGN_CENTER, 0, 0);
+    lv_label_set_text(widget->wpm_label, "---");
 
     sys_slist_append(&widgets, &widget->node);
 

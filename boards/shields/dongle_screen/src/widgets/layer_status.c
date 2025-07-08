@@ -67,6 +67,14 @@ int zmk_widget_layer_status_init(struct zmk_widget_layer_status *widget, lv_obj_
     widget->obj = lv_label_create(parent);
 
     lv_obj_set_style_text_font(widget->obj, &lv_font_montserrat_40, 0);
+    lv_obj_set_style_text_color(widget->obj, lv_color_white(), LV_PART_MAIN);
+    lv_obj_set_style_text_align(widget->obj, LV_TEXT_ALIGN_CENTER, 0);
+    
+    // Add subtle background circle for layer indicator
+    lv_obj_set_style_bg_color(widget->obj, lv_color_hex(0x222222), LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(widget->obj, LV_OPA_50, LV_PART_MAIN);
+    lv_obj_set_style_radius(widget->obj, LV_RADIUS_CIRCLE, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(widget->obj, 15, LV_PART_MAIN);
 
     sys_slist_append(&widgets, &widget->node);
 

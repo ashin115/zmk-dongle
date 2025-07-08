@@ -82,35 +82,22 @@ static void set_battery_symbol(lv_obj_t *widget, struct battery_state state) {
     lv_obj_t *symbol = battery_objects[state.source].symbol;
     lv_obj_t *label = battery_objects[state.source].label;
 
-    draw_battery(symbol, state.level, state.usb_present);
-    
-    if (state.level > 0) {
-        lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
-    } else {
+    // Minimalist text-only battery display
+    if (state.level < 1) {
         lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0);
-        lv_label_set_text(label, "X");
-    }
-
-    if (state.level < 1)
-    {
-        lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_RED), 0);
-        lv_label_set_text(label, "X");
-    } else if (state.level <= 10) {
-        lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_YELLOW), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_label_set_text(label, "⚠");
+    } else if (state.level <= 20) {
+        lv_obj_set_style_text_color(label, lv_palette_main(LV_PALETTE_ORANGE), 0);
+        lv_label_set_text_fmt(label, "%u%%", state.level);
     } else {
-        lv_obj_set_style_text_color(label, lv_color_white(), 0);
-        lv_label_set_text_fmt(label, "%4u", state.level);
+        lv_obj_set_style_text_color(label, lv_color_hex(0x888888), 0);
+        lv_label_set_text_fmt(label, "%u%%", state.level);
     }
     
-    
-    
-    lv_obj_clear_flag(symbol, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_move_foreground(symbol);
+    // Hide canvas battery icon for minimalist design
+    lv_obj_add_flag(symbol, LV_OBJ_FLAG_HIDDEN);
     lv_obj_clear_flag(label, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(label);
-
 }
 
 void battery_status_update_cb(struct battery_state state) {
@@ -162,8 +149,9 @@ ZMK_SUBSCRIPTION(widget_dongle_battery_status, zmk_usb_conn_state_changed);
 
 int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_status *widget, lv_obj_t *parent) {
     widget->obj = lv_obj_create(parent);
-
-    lv_obj_set_size(widget->obj, 240, 40);
+    lv_obj_set_size(widget->obj, 100, 25);
+    lv_obj_set_style_bg_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
+    lv_obj_set_style_border_opa(widget->obj, LV_OPA_TRANSP, LV_PART_MAIN);
     
     for (int i = 0; i < ZMK_SPLIT_CENTRAL_PERIPHERAL_COUNT + SOURCE_OFFSET; i++) {
         lv_obj_t *image_canvas = lv_canvas_create(widget->obj);
@@ -171,8 +159,10 @@ int zmk_widget_dongle_battery_status_init(struct zmk_widget_dongle_battery_statu
 
         lv_canvas_set_buffer(image_canvas, battery_image_buffer[i], 102, 5, LV_IMG_CF_TRUE_COLOR);
 
-        lv_obj_align(image_canvas, LV_ALIGN_BOTTOM_MID, -60 +(i * 120), -8);
-        lv_obj_align(battery_label, LV_ALIGN_TOP_MID, -60 +(i * 120), 0);
+        // Position battery info centrally for minimalist look
+        lv_obj_align(image_canvas, LV_ALIGN_CENTER, 0, 0);
+        lv_obj_align(battery_label, LV_ALIGN_CENTER, 0, 0);
+        lv_obj_set_style_text_font(battery_label, &lv_font_montserrat_12, 0);
 
         lv_obj_add_flag(image_canvas, LV_OBJ_FLAG_HIDDEN);
         lv_obj_add_flag(battery_label, LV_OBJ_FLAG_HIDDEN);
